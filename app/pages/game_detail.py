@@ -48,37 +48,22 @@ def render(df: pd.DataFrame):
     if tiers.empty:
         st.info("No prize tier data available.")
     else:
-        # Apply gradient on numeric values before any string formatting
-        numeric = tiers[["pct_remaining"]].copy()
-
-        display = tiers.copy()
-        display["prize_value"] = display["prize_value"].apply(lambda x: f"${x:,.0f}")
-        display["start_count"] = display["start_count"].apply(lambda x: f"{x:,}")
-        display["remaining_count"] = display["remaining_count"].apply(lambda x: f"{x:,}")
-        display["claimed_count"] = display["claimed_count"].apply(lambda x: f"{x:,}")
-        display["pct_remaining"] = display["pct_remaining"].apply(
-            lambda x: f"{x:.1f}%" if pd.notna(x) else "—"
-        )
-        display.columns = ["Prize", "Original", "Remaining", "Claimed", "% Left"]
-
-        def _gradient(col):
-            vals = numeric["pct_remaining"].fillna(0)
-            lo, hi = vals.min(), vals.max()
-            def color(v_str):
-                try:
-                    v = float(v_str.rstrip("%"))
-                except (ValueError, AttributeError):
-                    return ""
-                ratio = (v - lo) / (hi - lo) if hi > lo else 0.5
-                r = int(255 * (1 - ratio))
-                g = int(200 * ratio)
-                return f"background-color: rgb({r},{g},80)"
-            return col.map(color)
+        # Keep all columns numeric so sorting works correctly;
+        # use column_config for display formatting.
+        display = tiers[["prize_value", "start_count", "remaining_count",
+                          "claimed_count", "pct_remaining"]].copy()
 
         st.dataframe(
-            display.style.apply(_gradient, subset=["% Left"]),
+            display,
             use_container_width=True,
             hide_index=True,
+            column_config={
+                "prize_value":     st.column_config.NumberColumn("Prize",     format="$%,.0f"),
+                "start_count":     st.column_config.NumberColumn("Original",  format="%,d"),
+                "remaining_count": st.column_config.NumberColumn("Remaining", format="%,d"),
+                "claimed_count":   st.column_config.NumberColumn("Claimed",   format="%,d"),
+                "pct_remaining":   st.column_config.NumberColumn("% Left",    format="%.1f%%"),
+            },
         )
 
         # Bar chart: original vs remaining per tier

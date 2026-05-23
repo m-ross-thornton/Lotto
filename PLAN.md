@@ -238,9 +238,9 @@ Each state will need its own scraper module under `scraper/` (e.g., `scraper/va_
 ## Implementation Order
 
 1. `[x]` Phase 1 — Run `discover.py`, inspect endpoints and export file
-2. `[ ]` Phase 2a — Write `db/schema.py`, create SQLite DB
-3. `[ ]` Phase 2b — Write `scraper/md_lottery.py` using discovered endpoints
-4. `[ ]` Phase 2c — Run first full scrape, verify data in DB
+2. `[x]` Phase 2a — Write `db/schema.py`, create SQLite DB
+3. `[x]` Phase 2b — Write `scraper/md_lottery.py` using discovered endpoints
+4. `[x]` Phase 2c — Run first full scrape, verify data in DB (91 games, 939 prize tier rows)
 5. `[ ]` Phase 3 — Write `scoring/ev.py`, test against scraped data
 6. `[ ]` Phase 4a — Build Streamlit game list page
 7. `[ ]` Phase 4b — Build game detail page

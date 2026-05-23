@@ -177,7 +177,17 @@ def fetch_games() -> list[Game]:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
+    from db.schema import init_db
+    from db import get_connection
+    from db.queries import save_scrape_run
+
+    init_db()
     games = fetch_games()
+
+    conn = get_connection()
+    save_scrape_run(conn, games)
+    conn.close()
+    log.info("Saved %d games to database.", len(games))
 
     print(f"\n{'Game':<35} {'$':>4} {'EV/$ ':>7} {'TopRem':>7} {'AllRem':>8} {'TixRem':>10}")
     print("-" * 80)

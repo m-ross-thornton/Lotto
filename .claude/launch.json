@@ -1,0 +1,14 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "streamlit",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "streamlit", "run", "app/main.py", "--server.port", "8502"],
+      "port": 8502,
+      "env": {
+        "PYTHONPATH": "/Users/ross/Projects/Lotto"
+      }
+    }
+  ]
+}

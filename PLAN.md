@@ -241,10 +241,10 @@ Each state will need its own scraper module under `scraper/` (e.g., `scraper/va_
 2. `[x]` Phase 2a — Write `db/schema.py`, create SQLite DB
 3. `[x]` Phase 2b — Write `scraper/md_lottery.py` using discovered endpoints
 4. `[x]` Phase 2c — Run first full scrape, verify data in DB (91 games, 939 prize tier rows)
-5. `[ ]` Phase 3 — Write `scoring/ev.py`, test against scraped data
-6. `[ ]` Phase 4a — Build Streamlit game list page
-7. `[ ]` Phase 4b — Build game detail page
-8. `[ ]` Phase 4c — Build retailer map page
+5. `[x]` Phase 3 — Write `scoring/ev.py`, test against scraped data
+6. `[x]` Phase 4a — Build Streamlit game list page
+7. `[x]` Phase 4b — Build game detail page
+8. `[ ]` Phase 4c — Build retailer map page (skipped — no per-game retailer inventory available)
 9. `[ ]` Phase 5 — Research and add VA, PA, DE scrapers
 
 ---

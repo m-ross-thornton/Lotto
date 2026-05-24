@@ -19,6 +19,8 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
+ENV PATH="/app/.venv/bin:$PATH"
+
 # Copy venv from builder
 COPY --from=builder /app/.venv /app/.venv
 

@@ -7,9 +7,8 @@
 | EC2 t2.micro | Runs the app 24/7 | Free tier (750 hrs/mo for 12 months, ~$8/mo after) |
 | EBS 20 GB | Persistent disk for SQLite | Free tier (30 GB included) |
 | Elastic IP | Fixed public IP | Free while attached to a running instance |
-| DuckDNS | Free subdomain (e.g. `md-lotto.duckdns.org`) | Free |
-| Let's Encrypt | HTTPS certificate | Free |
-| Nginx | Reverse proxy + SSL termination | Free |
+
+Access the app at `http://YOUR_ELASTIC_IP:8501`
 
 ---
 
@@ -27,8 +26,7 @@
    | Type | Port | Source |
    |---|---|---|
    | SSH | 22 | My IP |
-   | HTTP | 80 | 0.0.0.0/0 |
-   | HTTPS | 443 | 0.0.0.0/0 |
+   | Custom TCP | 8501 | 0.0.0.0/0 |
 5. Click **Launch Instance**
 
 ---
@@ -38,47 +36,33 @@
 1. In EC2 console → **Elastic IPs** → **Allocate Elastic IP address**
 2. Click **Allocate**, then **Associate Elastic IP address**
 3. Select your `md-lotto` instance → **Associate**
-4. Note the IP address — you'll use it in Step 3
+4. Note the IP address — this is your permanent app URL
 
 ---
 
-## Step 3 — Get a free DuckDNS domain
-
-1. Go to [duckdns.org](https://www.duckdns.org) and sign in (GitHub/Google)
-2. Pick a subdomain, e.g. `md-lotto` → click **Add Domain**
-3. Set the IP to your Elastic IP → **Update IP**
-4. Copy your **token** from the top of the page
-
----
-
-## Step 4 — Set up the server
+## Step 3 — Set up the server
 
 SSH into your instance:
 ```bash
 ssh -i your-key.pem ubuntu@YOUR_ELASTIC_IP
 ```
 
-Install Docker, Nginx, and Certbot:
+Install Docker:
 ```bash
-# Docker
 curl -fsSL https://get.docker.com | sudo sh
 sudo usermod -aG docker ubuntu
 newgrp docker   # apply group without logout
 
-# Docker Compose plugin
 sudo apt-get install -y docker-compose-plugin
-
-# Nginx + Certbot
-sudo apt-get install -y nginx certbot python3-certbot-nginx
 ```
 
 ---
 
-## Step 5 — Deploy the app
+## Step 4 — Deploy the app
 
 Clone the repo and start the container:
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git lotto
+git clone https://github.com/m-ross-thornton/Lotto.git lotto
 cd lotto
 mkdir -p data
 docker compose up -d --build
@@ -90,61 +74,14 @@ docker compose logs -f
 # Should see scraper running and then "You can now view your Streamlit app in your browser"
 ```
 
-Test locally on the server:
-```bash
-curl -s -o /dev/null -w "%{http_code}" http://localhost:8501
-# Should return 200
-```
-
----
-
-## Step 6 — Set up Nginx + HTTPS
-
-Copy and edit the Nginx config:
-```bash
-sudo cp ~/lotto/deploy/nginx.conf /etc/nginx/sites-available/mdlotto
-
-# Replace YOUR_DOMAIN with your actual subdomain (e.g. md-lotto)
-sudo sed -i 's/YOUR_DOMAIN/md-lotto/g' /etc/nginx/sites-available/mdlotto
-
-sudo ln -s /etc/nginx/sites-available/mdlotto /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
-```
-
-Get the SSL certificate (replace with your domain):
-```bash
-sudo certbot --nginx -d md-lotto.duckdns.org
-```
-Follow the prompts — Certbot auto-configures Nginx for HTTPS.
-
-Test HTTPS:
-```bash
-curl -s -o /dev/null -w "%{http_code}" https://md-lotto.duckdns.org
-# Should return 200
-```
-
----
-
-## Step 7 — Keep DuckDNS updated (optional)
-
-Elastic IPs are fixed, so this is only needed if you ever stop/restart the instance
-and AWS reassigns the IP (it won't if Elastic IP stays associated).
-
-```bash
-# Edit the script with your domain and token
-nano ~/lotto/deploy/duckdns-renew.sh
-chmod +x ~/lotto/deploy/duckdns-renew.sh
-
-# Add to crontab
-(crontab -l 2>/dev/null; echo "*/5 * * * * /home/ubuntu/lotto/deploy/duckdns-renew.sh >> /var/log/duckdns.log 2>&1") | crontab -
-```
+Open `http://YOUR_ELASTIC_IP:8501` in a browser — the app should load.
 
 ---
 
 ## Adding to your Android home screen (PWA)
 
 1. Open **Chrome** on your Android phone
-2. Navigate to `https://md-lotto.duckdns.org`
+2. Navigate to `http://YOUR_ELASTIC_IP:8501`
 3. Tap **⋮ menu → Add to Home screen → Add**
 4. An icon appears — opens the app fullscreen, no browser chrome
 
@@ -157,25 +94,23 @@ chmod +x ~/lotto/deploy/duckdns-renew.sh
 ssh -i your-key.pem ubuntu@YOUR_ELASTIC_IP
 
 # View live app logs
-ssh ... "cd lotto && docker compose logs -f"
+ssh -i your-key.pem ubuntu@YOUR_ELASTIC_IP "cd lotto && docker compose logs -f"
 
 # Restart app
-ssh ... "cd lotto && docker compose restart"
+ssh -i your-key.pem ubuntu@YOUR_ELASTIC_IP "cd lotto && docker compose restart"
 
 # Pull latest code and redeploy
-ssh ... "cd lotto && git pull && docker compose up -d --build"
+ssh -i your-key.pem ubuntu@YOUR_ELASTIC_IP "cd lotto && git pull && docker compose up -d --build"
 
 # Manual scraper run
-ssh ... "cd lotto && docker compose exec app python -m scraper.md_lottery"
+ssh -i your-key.pem ubuntu@YOUR_ELASTIC_IP "cd lotto && docker compose exec app python -m scraper.md_lottery"
 ```
 
 ---
 
 ## Updating the app
 
+Push changes to GitHub, then on the server:
 ```bash
-# On your Mac — push changes to git, then on the server:
 git pull && docker compose up -d --build
 ```
-
-Or set up a GitHub Action to auto-deploy on push to `main`.

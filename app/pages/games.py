@@ -98,11 +98,11 @@ def render(df: pd.DataFrame):
     )
 
     # ── EV over time: top 20 games ────────────────────────────────────────
-    st.subheader("EV / Dollar Over Time — Top 20 Games")
+    st.subheader("EV / Dollar Over Time — Top 10 Games")
 
-    top20_ids = df.head(20)["game_id"].tolist()
+    top10_ids = df.head(10)["game_id"].tolist()
     with get_connection() as conn:
-        history = get_ev_history(conn, top20_ids)
+        history = get_ev_history(conn, top10_ids)
 
     if history.empty or history["scraped_at"].nunique() < 2:
         st.info(
@@ -110,10 +110,10 @@ def render(df: pd.DataFrame):
             "to start seeing trends."
         )
     else:
-        # Keep only names that appear in the top-20 of the *current* ranking
+        # Keep only names that appear in the top-10 of the *current* ranking
         # so the legend stays readable even if a game moves in/out over time
-        top20_names = df.head(20)["name"].tolist()
-        history = history[history["name"].isin(top20_names)]
+        top10_names = df.head(10)["name"].tolist()
+        history = history[history["name"].isin(top10_names)]
 
         fig = px.line(
             history,

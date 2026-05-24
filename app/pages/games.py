@@ -4,6 +4,9 @@ import pandas as pd
 import plotly.express as px
 import streamlit as st
 
+from db import get_connection
+from scoring.ev import get_ev_history
+
 
 def render(df: pd.DataFrame):
     st.header("🏆 Game Rankings")
@@ -93,6 +96,52 @@ def render(df: pd.DataFrame):
         hide_index=True,
         height=600,
     )
+
+    # ── EV over time: top 20 games ────────────────────────────────────────
+    st.subheader("EV / Dollar Over Time — Top 20 Games")
+
+    top20_ids = df.head(20)["game_id"].tolist()
+    with get_connection() as conn:
+        history = get_ev_history(conn, top20_ids)
+
+    if history.empty or history["scraped_at"].nunique() < 2:
+        st.info(
+            "Only one snapshot so far — run **Refresh Data** again later "
+            "to start seeing trends."
+        )
+    else:
+        # Keep only names that appear in the top-20 of the *current* ranking
+        # so the legend stays readable even if a game moves in/out over time
+        top20_names = df.head(20)["name"].tolist()
+        history = history[history["name"].isin(top20_names)]
+
+        fig = px.line(
+            history,
+            x="scraped_at",
+            y="ev_per_dollar",
+            color="name",
+            markers=True,
+            labels={
+                "scraped_at": "Date",
+                "ev_per_dollar": "EV / Dollar",
+                "name": "Game",
+            },
+            hover_data={"ev_per_dollar": ":.4f"},
+        )
+        fig.update_layout(
+            height=450,
+            yaxis_tickformat=".3f",
+            legend=dict(
+                orientation="v",
+                x=1.01,
+                y=1,
+                font=dict(size=11),
+            ),
+            margin=dict(r=220),
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    st.divider()
 
     # ── EV scatter: completion vs EV, bubble = top prizes left ────────────
     st.subheader("Completion vs. Expected Value")

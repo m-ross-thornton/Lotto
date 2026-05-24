@@ -102,6 +102,28 @@ def get_prize_tiers(conn: sqlite3.Connection, game_id: str) -> pd.DataFrame:
     )
 
 
+def get_ev_history(conn: sqlite3.Connection, game_ids: list[str]) -> pd.DataFrame:
+    """
+    Return the full snapshot history for a set of games, suitable for a
+    multi-line EV-over-time chart.
+    """
+    if not game_ids:
+        return pd.DataFrame()
+    placeholders = ",".join("?" * len(game_ids))
+    return pd.read_sql_query(
+        f"""
+        SELECT s.game_id, g.name, s.scraped_at, s.ev_per_dollar
+        FROM snapshots s
+        JOIN games g ON g.game_id = s.game_id
+        WHERE s.game_id IN ({placeholders})
+        ORDER BY s.scraped_at ASC
+        """,
+        conn,
+        params=game_ids,
+        parse_dates=["scraped_at"],
+    )
+
+
 def get_snapshot_history(conn: sqlite3.Connection, game_id: str) -> pd.DataFrame:
     """All snapshots for a game, for trend charts."""
     return pd.read_sql_query(

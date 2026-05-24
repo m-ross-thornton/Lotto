@@ -8,11 +8,15 @@ dependencies = [
     "lxml>=6.1.1",
     "matplotlib>=3.10.9",
     "pandas>=2.3.3",
-    "playwright>=1.60.0",
     "plotly>=6.7.0",
     "requests>=2.34.2",
     "streamlit>=1.57.0",
 ]
+
+# playwright is only needed for scraper/discover.py (Phase 1 research tool).
+# The production scraper uses plain requests — no browser needed.
+[dependency-groups]
+dev = ["playwright>=1.60.0"]
 
 [tool.uv]
 package = true

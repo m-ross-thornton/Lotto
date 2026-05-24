@@ -21,6 +21,21 @@ st.set_page_config(
     layout="wide",
 )
 
+# ── PWA manifest + mobile meta tags ───────────────────────────────────────
+# Enables "Add to Home Screen" on Android/iOS — opens as a standalone app.
+st.markdown(
+    """
+    <link rel="manifest" href="/app/static/manifest.json">
+    <meta name="theme-color" content="#1a3a5c">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MD Lotto">
+    <link rel="apple-touch-icon" href="/app/static/icon-192.png">
+    """,
+    unsafe_allow_html=True,
+)
+
 # ── Ensure DB exists ───────────────────────────────────────────────────────
 init_db()
 

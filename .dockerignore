@@ -1,0 +1,10 @@
+.venv/
+data/*.db
+data/*.json
+data/*.html
+data/*.csv
+data/*.xlsx
+__pycache__/
+*.py[oc]
+.git/
+.claude/

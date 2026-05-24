@@ -1,0 +1,9 @@
+[server]
+enableStaticServing = true   # serves files from ./static/ at /app/static/
+headless = true
+
+[theme]
+primaryColor        = "#f0c040"
+backgroundColor     = "#0e1117"
+secondaryBackgroundColor = "#1a3a5c"
+textColor           = "#fafafa"

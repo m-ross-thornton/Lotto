@@ -19,3 +19,7 @@ data/*.db
 # Keep directory structure
 !data/.gitkeep
 !data/sample_export/.gitkeep
+
+# SSH private keys — never commit these
+*.pem
+*.key

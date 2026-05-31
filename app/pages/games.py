@@ -77,9 +77,6 @@ def render(df: pd.DataFrame):
     display["Top Prize ($)"] = display["Top Prize ($)"].apply(
         lambda x: f"${x:,.0f}" if pd.notna(x) else "—"
     )
-    display["Est. Tickets Left"] = display["Est. Tickets Left"].apply(
-        lambda x: f"{x:,.0f}" if pd.notna(x) else "—"
-    )
     display["% Complete"] = display["% Complete"].apply(
         lambda x: f"{x * 100:.1f}%" if pd.notna(x) else "—"
     )
@@ -95,6 +92,9 @@ def render(df: pd.DataFrame):
         use_container_width=True,
         hide_index=True,
         height=600,
+        column_config={
+            "Est. Tickets Left": st.column_config.NumberColumn(format="%d"),
+        },
     )
 
     # ── EV over time: top 20 games ────────────────────────────────────────
